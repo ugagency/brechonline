@@ -1,0 +1,5 @@
+{
+  "name": "BrechOnLine",
+  "description": "Sistema SaaS simples para gestão de brechós físicos: estoque, consignação, trocas e fidelização.",
+  "requestFramePermissions": []
+}
