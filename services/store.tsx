@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Item, Vendor, Customer, Sale, Coupon, ItemStatus, ItemCondition, Profile, UserRole } from '../types';
 import { supabase } from './supabase';
 
@@ -14,14 +14,17 @@ interface StoreContextType {
   
   addItem: (item: Omit<Item, 'id' | 'entryDate' | 'status'>) => Promise<void>;
   updateItemStatus: (id: string, status: ItemStatus) => Promise<void>;
+  deleteItem: (id: string) => Promise<void>;
   addVendor: (vendor: Omit<Vendor, 'id' | 'balance'>) => Promise<void>;
   payVendor: (vendorId: string, amount: number) => Promise<void>;
   addCustomer: (customer: Omit<Customer, 'id' | 'storeCredit'>) => Promise<void>;
   processSale: (itemIds: string[], customerId: string | undefined, paymentMethod: string, discount: number, usedCredit: number) => Promise<void>;
   processTradeIn: (customerId: string, creditAmount: number, newItems: Omit<Item, 'id' | 'entryDate' | 'status'>[]) => Promise<void>;
   addCoupon: (coupon: Coupon) => Promise<void>;
-  addProfile: (profile: Omit<Profile, 'id' | 'createdAt'>) => Promise<void>;
+  addProfile: (profile: Omit<Profile, 'id' | 'createdAt' | 'active'>) => Promise<void>;
   deleteProfile: (id: string) => Promise<void>;
+  toggleProfileStatus: (id: string, currentStatus: boolean) => Promise<void>;
+  authenticate: (email: string, password: string) => Promise<Profile | null>;
   fetchData: () => Promise<void>;
 }
 
@@ -36,7 +39,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [itemsRes, vendorsRes, customersRes, couponsRes, salesRes, profilesRes] = await Promise.all([
         supabase.from('items').select('*').order('created_at', { ascending: false }),
@@ -47,129 +50,114 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         supabase.from('profiles').select('*').order('name')
       ]);
 
-      if (itemsRes.data) {
-        setItems(itemsRes.data.map(i => ({
-          id: String(i.id),
-          imageUrl: String(i.image_url || ''),
-          category: String(i.title || ''),
-          size: String(i.size || ''),
-          condition: (i.condition || ItemCondition.GOOD) as ItemCondition,
-          price: Number(i.price || 0),
-          status: (i.status || ItemStatus.EVALUATION) as ItemStatus,
-          vendorId: i.vendor_id ? String(i.vendor_id) : undefined,
-          entryDate: String(i.created_at),
-          soldDate: i.sold_at ? String(i.sold_at) : undefined
-        })));
-      }
+      setItems((itemsRes.data || []).map(i => ({
+        id: String(i.id),
+        imageUrl: String(i.image_url || ''),
+        category: String(i.title || ''),
+        size: String(i.size || ''),
+        condition: (i.condition || ItemCondition.GOOD) as ItemCondition,
+        price: Number(i.price || 0),
+        status: (i.status || ItemStatus.EVALUATION) as ItemStatus,
+        vendorId: i.vendor_id ? String(i.vendor_id) : undefined,
+        entryDate: String(i.created_at),
+        soldDate: i.sold_at ? String(i.sold_at) : undefined
+      })));
       
-      if (vendorsRes.data) {
-        setVendors(vendorsRes.data.map(v => ({
-          id: String(v.id),
-          name: String(v.name || ''),
-          phone: String(v.phone || ''),
-          commissionRate: Number(v.commission_rate || 0.5),
-          balance: Number(v.balance || 0)
-        })));
-      }
+      setVendors((vendorsRes.data || []).map(v => ({
+        id: String(v.id),
+        name: String(v.name || ''),
+        phone: String(v.phone || ''),
+        commissionRate: Number(v.commission_rate || 0.5),
+        balance: Number(v.balance || 0)
+      })));
 
-      if (customersRes.data) {
-        setCustomers(customersRes.data.map(c => ({
-          id: String(c.id),
-          name: String(c.name || ''),
-          cpf: String(c.cpf || ''),
-          storeCredit: Number(c.store_credit || 0)
-        })));
-      }
+      setCustomers((customersRes.data || []).map(c => ({
+        id: String(c.id),
+        name: String(c.name || ''),
+        cpf: String(c.cpf || ''),
+        storeCredit: Number(c.store_credit || 0)
+      })));
 
-      if (couponsRes.data) {
-        setCoupons(couponsRes.data.map(cp => ({
-          code: String(cp.code || ''),
-          type: (cp.type || 'FIXED') as 'FIXED' | 'PERCENT',
-          value: Number(cp.value || 0),
-          active: Boolean(cp.active)
-        })));
-      }
+      setCoupons((couponsRes.data || []).map(cp => ({
+        code: String(cp.code || ''),
+        type: (cp.type || 'FIXED') as 'FIXED' | 'PERCENT',
+        value: Number(cp.value || 0),
+        active: Boolean(cp.active)
+      })));
 
-      if (salesRes.data) {
-        setSales(salesRes.data.map(s => ({
-          id: String(s.id),
-          items: [],
-          total: Number(s.total_amount || 0),
-          date: String(s.created_at),
-          paymentMethod: (s.payment_method || 'CASH') as any,
-          customerId: s.customer_id ? String(s.customer_id) : undefined,
-          discountApplied: Number(s.discount_applied || 0) + Number(s.credit_used || 0)
-        })));
-      }
+      setSales((salesRes.data || []).map(s => ({
+        id: String(s.id),
+        items: [],
+        total: Number(s.total_amount || 0),
+        date: String(s.created_at),
+        paymentMethod: (s.payment_method || 'CASH') as any,
+        customerId: s.customer_id ? String(s.customer_id) : undefined,
+        discountApplied: Number(s.discount_applied || 0) + Number(s.credit_used || 0)
+      })));
 
-      if (profilesRes.data) {
-        setProfiles(profilesRes.data.map(p => ({
-          id: String(p.id),
-          name: String(p.name || ''),
-          email: String(p.email || ''),
-          role: (p.role || 'CAIXA') as UserRole,
-          createdAt: String(p.created_at)
-        })));
-      }
+      setProfiles((profilesRes.data || []).map(p => ({
+        id: String(p.id),
+        name: String(p.name || ''),
+        email: String(p.email || ''),
+        role: (p.role || 'CAIXA') as UserRole,
+        active: p.active !== false,
+        createdAt: String(p.created_at)
+      })));
+
     } catch (error: any) {
       console.error('Falha ao buscar dados:', error.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
-  const uploadImage = async (base64: string): Promise<string> => {
-    if (!base64.startsWith('data:image')) return base64;
-    
-    try {
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
-      const res = await fetch(base64);
-      const blob = await res.blob();
-      
-      const { error: uploadError } = await supabase.storage.from('products').upload(fileName, blob);
-      
-      if (uploadError) {
-        console.error('Erro detalhado do Storage:', uploadError);
-        if (uploadError.message.includes('row-level security')) {
-          throw new Error('PERMISSÃO NEGADA: O bucket "products" no Supabase precisa de uma política (RLS) que permita inserção pública. Vá em Storage -> Policies e adicione uma política para o bucket "products".');
-        }
-        throw new Error(`Erro Storage: ${uploadError.message}`);
-      }
-      
-      const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
-      return publicUrl;
-    } catch (e: any) {
-      console.error('Falha no uploadImage:', e);
-      throw e;
-    }
+  const authenticate = async (email: string, password: string): Promise<Profile | null> => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .eq('password', password)
+      .single();
+
+    if (error || !data) return null;
+    if (!data.active) throw new Error("Esta conta está desativada. Entre em contato com o administrador.");
+
+    return {
+      id: String(data.id),
+      name: String(data.name),
+      email: String(data.email),
+      role: data.role as UserRole,
+      active: data.active,
+      createdAt: String(data.created_at)
+    };
   };
 
   const addItem = async (itemData: Omit<Item, 'id' | 'entryDate' | 'status'>) => {
-    try {
-      const publicUrl = await uploadImage(itemData.imageUrl);
-      const { error } = await supabase.from('items').insert({
-        title: itemData.category,
-        size: itemData.size,
-        condition: itemData.condition,
-        price: itemData.price,
-        image_url: publicUrl,
-        vendor_id: itemData.vendorId || null,
-        status: ItemStatus.EVALUATION
-      });
-      if (error) throw new Error(`Erro Banco: ${error.message}`);
-      await fetchData();
-    } catch (e: any) {
-      console.error('Falha no addItem:', e);
-      throw e;
-    }
+    const { error } = await supabase.from('items').insert({
+      title: itemData.category,
+      size: itemData.size,
+      condition: itemData.condition,
+      price: itemData.price,
+      image_url: itemData.imageUrl,
+      vendor_id: itemData.vendorId || null,
+      status: ItemStatus.EVALUATION
+    });
+    if (error) throw new Error(error.message);
+    await fetchData();
   };
 
   const updateItemStatus = async (id: string, status: ItemStatus) => {
     const { error } = await supabase.from('items').update({ status }).eq('id', id);
+    if (error) throw new Error(error.message);
+    await fetchData();
+  };
+
+  const deleteItem = async (id: string) => {
+    const { error } = await supabase.from('items').delete().eq('id', id);
     if (error) throw new Error(error.message);
     await fetchData();
   };
@@ -204,13 +192,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await fetchData();
   };
 
-  const addProfile = async (profileData: Omit<Profile, 'id' | 'createdAt'>) => {
+  const addProfile = async (profileData: Omit<Profile, 'id' | 'createdAt' | 'active'>) => {
     const { error } = await supabase.from('profiles').insert({
       name: profileData.name,
       email: profileData.email,
-      role: profileData.role
+      password: profileData.password,
+      role: profileData.role,
+      active: true
     });
-    if (error) throw new Error(`Erro Banco: ${error.message}`);
+    if (error) throw new Error(error.message);
+    await fetchData();
+  };
+
+  const toggleProfileStatus = async (id: string, currentStatus: boolean) => {
+    const { error } = await supabase.from('profiles').update({ active: !currentStatus }).eq('id', id);
+    if (error) throw new Error(error.message);
     await fetchData();
   };
 
@@ -258,13 +254,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const customer = customers.find(c => c.id === customerId);
       if (customer) {
         await supabase.from('customers').update({ store_credit: customer.storeCredit - usedCredit }).eq('id', customerId);
-        await supabase.from('customer_transactions').insert({
-          customer_id: customerId,
-          type: 'CREDIT_SPENT',
-          amount: usedCredit,
-          description: `Venda #${String(saleData.id).slice(-4)}`,
-          related_sale_id: saleData.id
-        });
       }
     }
 
@@ -272,24 +261,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const processTradeIn = async (customerId: string, creditAmount: number, newItems: Omit<Item, 'id' | 'entryDate' | 'status'>[]) => {
-    try {
-      const customer = customers.find(c => c.id === customerId);
-      if (customer) {
-        await supabase.from('customers').update({ store_credit: customer.storeCredit + creditAmount }).eq('id', customerId);
-        await supabase.from('customer_transactions').insert({ customer_id: customerId, type: 'CREDIT_ADDED', amount: creditAmount, description: 'Troca de peças' });
-      }
-      for (const item of newItems) { await addItem(item); }
-      await fetchData();
-    } catch (e: any) {
-      console.error('Falha no processTradeIn:', e);
-      throw e;
+    const customer = customers.find(c => c.id === customerId);
+    if (customer) {
+      await supabase.from('customers').update({ store_credit: customer.storeCredit + creditAmount }).eq('id', customerId);
     }
+    for (const item of newItems) { await addItem(item); }
+    await fetchData();
   };
 
   return (
     <StoreContext.Provider value={{ 
       items, vendors, customers, sales, coupons, profiles, loading,
-      addItem, updateItemStatus, addVendor, payVendor, addCustomer, processSale, processTradeIn, addCoupon, fetchData, addProfile, deleteProfile
+      addItem, updateItemStatus, deleteItem, addVendor, payVendor, addCustomer, processSale, processTradeIn, addCoupon, fetchData, addProfile, deleteProfile, toggleProfileStatus, authenticate
     }}>
       {children}
     </StoreContext.Provider>

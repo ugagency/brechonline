@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { useStore } from '../services/store';
 import { Item, ItemCondition, ItemStatus } from '../types';
-import { Plus, Check, X, Search, Filter, Camera, Upload, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Check, X, Search, Filter, Camera, Upload, Loader2, AlertCircle, Trash2 } from 'lucide-react';
 
 export const Inventory: React.FC = () => {
-  const { items, addItem, updateItemStatus, vendors } = useStore();
+  const { items, addItem, updateItemStatus, deleteItem, vendors } = useStore();
   const [filter, setFilter] = useState<'ALL' | 'EVALUATION' | 'FOR_SALE' | 'SOLD'>('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,6 +78,17 @@ export const Inventory: React.FC = () => {
       setErrorMessage(msg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteItem = async (id: string, category: string) => {
+    if (confirm(`Tem certeza que deseja excluir permanentemente a peça "${category}" do sistema? Esta ação não pode ser desfeita.`)) {
+      try {
+        await deleteItem(id);
+        alert("Peça excluída com sucesso.");
+      } catch (e: any) {
+        alert("Erro ao excluir peça: " + e.message);
+      }
     }
   };
 
@@ -184,6 +195,15 @@ export const Inventory: React.FC = () => {
                         <X size={18} />
                       </button>
                     </>
+                  )}
+                  {(item.status === ItemStatus.SOLD || item.status === ItemStatus.TRADED) && (
+                    <button 
+                      onClick={() => handleDeleteItem(item.id, item.category)}
+                      className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors" 
+                      title="Excluir do Sistema"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   )}
                 </td>
               </tr>

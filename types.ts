@@ -19,7 +19,9 @@ export interface Profile {
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: UserRole;
+  active: boolean;
   createdAt: string;
 }
 

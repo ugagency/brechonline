@@ -7,6 +7,7 @@ interface LayoutProps {
   currentView: string;
   setView: (view: string) => void;
   onLogout: () => void;
+  userRole: string;
 }
 
 const NavItem = ({ view, current, label, icon: Icon, setView }: any) => (
@@ -35,7 +36,9 @@ const MobileNavItem = ({ view, current, icon: Icon, setView, label }: any) => (
   </button>
 );
 
-export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, onLogout }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, onLogout, userRole }) => {
+  const isAdmin = userRole === 'ADMIN';
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Desktop Sidebar */}
@@ -54,10 +57,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
           <NavItem view="trade" current={currentView} label="Trocas & Crédito" icon={RefreshCcw} setView={setView} />
           <NavItem view="vendors" current={currentView} label="Fornecedoras" icon={Users} setView={setView} />
           <NavItem view="customers" current={currentView} label="Clientes" icon={Users} setView={setView} />
-          <div className="pt-4 pb-2">
-             <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sistema</p>
-          </div>
-          <NavItem view="profiles" current={currentView} label="Usuários" icon={ShieldCheck} setView={setView} />
+          
+          {isAdmin && (
+            <>
+              <div className="pt-4 pb-2">
+                 <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sistema</p>
+              </div>
+              <NavItem view="profiles" current={currentView} label="Usuários" icon={ShieldCheck} setView={setView} />
+            </>
+          )}
         </nav>
 
         <div className="p-4 border-t border-gray-200">
@@ -95,7 +103,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
           <MobileNavItem view="inventory" current={currentView} label="Estoque" icon={Tag} setView={setView} />
           <MobileNavItem view="pos" current={currentView} label="Caixa" icon={ShoppingBag} setView={setView} />
           <MobileNavItem view="trade" current={currentView} label="Trocas" icon={RefreshCcw} setView={setView} />
-          <MobileNavItem view="profiles" current={currentView} label="Acessos" icon={ShieldCheck} setView={setView} />
+          {isAdmin && <MobileNavItem view="profiles" current={currentView} label="Acessos" icon={ShieldCheck} setView={setView} />}
         </div>
       </main>
     </div>
