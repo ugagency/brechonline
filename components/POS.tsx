@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useStore } from '../services/store';
 import { Item, ItemStatus } from '../types';
@@ -92,7 +93,7 @@ export const POS: React.FC = () => {
             type="text" 
             autoFocus
             placeholder="Buscar por nome (ex: Vestido) ou código..." 
-            className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-indigo-100 focus:border-indigo-500 focus:outline-none shadow-sm text-lg"
+            className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-orange-100 focus:border-orange-500 focus:outline-none shadow-sm text-lg"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -105,7 +106,7 @@ export const POS: React.FC = () => {
                 <div 
                   key={item.id} 
                   onClick={() => addToCart(item)}
-                  className="bg-white rounded-xl border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md hover:border-indigo-300 transition group"
+                  className="bg-white rounded-xl border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md hover:border-orange-300 transition group"
                 >
                   <div className="aspect-square bg-gray-100 relative overflow-hidden">
                     <img src={item.imageUrl} alt={item.category} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -118,7 +119,7 @@ export const POS: React.FC = () => {
                       <h3 className="font-semibold text-slate-800 truncate pr-2">{item.category}</h3>
                       <span className="text-xs text-slate-400 font-mono">{item.id}</span>
                     </div>
-                    <p className="text-lg font-bold text-indigo-600">R$ {item.price.toFixed(2)}</p>
+                    <p className="text-lg font-bold text-orange-600">R$ {item.price.toFixed(2)}</p>
                   </div>
                 </div>
               ))}
@@ -141,7 +142,7 @@ export const POS: React.FC = () => {
             <ShoppingCart size={20} />
             <h2 className="font-bold">Cesta de Compras</h2>
           </div>
-          <span className="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-full">{cart.length} itens</span>
+          <span className="bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded-full">{cart.length} itens</span>
         </div>
 
         {/* Cart Items List */}
@@ -179,7 +180,7 @@ export const POS: React.FC = () => {
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <select 
-                className="w-full pl-9 pr-2 py-2 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="w-full pl-9 pr-2 py-2 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-orange-500 text-sm"
                 value={selectedCustomerId}
                 onChange={e => setSelectedCustomerId(e.target.value)}
               >
@@ -196,7 +197,7 @@ export const POS: React.FC = () => {
                    id="useCredit" 
                    checked={useStoreCredit} 
                    onChange={e => setUseStoreCredit(e.target.checked)} 
-                   className="rounded text-indigo-600 focus:ring-indigo-500"
+                   className="rounded text-orange-600 focus:ring-orange-500"
                  />
                  <label htmlFor="useCredit" className="text-xs text-emerald-600 font-bold cursor-pointer">
                    Usar crédito: R$ {customer.storeCredit.toFixed(2)}
@@ -242,7 +243,7 @@ export const POS: React.FC = () => {
                 key={method}
                 onClick={() => setPaymentMethod(method)}
                 className={`py-2 text-xs font-bold rounded-lg border transition ${
-                  paymentMethod === method ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-gray-200 text-slate-500 hover:bg-gray-50'
+                  paymentMethod === method ? 'bg-orange-50 border-orange-500 text-orange-700' : 'border-gray-200 text-slate-500 hover:bg-gray-50'
                 }`}
               >
                 {method === 'CASH' ? 'DINHEIRO' : method === 'CARD' ? 'CARTÃO' : 'PIX'}

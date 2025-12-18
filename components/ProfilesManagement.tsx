@@ -89,16 +89,16 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
         </div>
         <button 
           onClick={() => setShowAdd(true)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 shadow-sm font-medium"
+          className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition flex items-center gap-2 shadow-sm font-medium"
         >
           <UserPlus size={18} /> Novo Usuário
         </button>
       </div>
 
       {showAdd && (
-        <div className="bg-white p-6 rounded-2xl border border-indigo-100 shadow-xl animate-in fade-in slide-in-from-top-4">
+        <div className="bg-white p-6 rounded-2xl border border-orange-100 shadow-xl animate-in fade-in slide-in-from-top-4">
           <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <Key size={20} className="text-indigo-600" />
+            <Key size={20} className="text-orange-600" />
             Configurar Novo Acesso
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -107,7 +107,7 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
               <input 
                 type="text" 
                 placeholder="Ex: Maria Silva" 
-                className="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" 
+                className="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" 
                 value={name} 
                 onChange={e => setName(e.target.value)} 
               />
@@ -117,7 +117,7 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
               <input 
                 type="email" 
                 placeholder="exemplo@email.com" 
-                className="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" 
+                className="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" 
                 value={email} 
                 onChange={e => setEmail(e.target.value)} 
               />
@@ -127,7 +127,7 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
               <input 
                 type="password" 
                 placeholder="Mínimo 6 dígitos" 
-                className="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" 
+                className="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" 
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
               />
@@ -135,7 +135,7 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
             <div>
               <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-tight">Nível de Acesso</label>
               <select 
-                className="w-full p-2.5 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-indigo-500 outline-none" 
+                className="w-full p-2.5 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-orange-500 outline-none" 
                 value={role} 
                 onChange={e => setRole(e.target.value as UserRole)}
               >
@@ -154,7 +154,7 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
              <button 
               onClick={handleSave} 
               disabled={loading}
-              className="px-8 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition flex items-center gap-2 shadow-lg active:scale-95"
+              className="px-8 py-2.5 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition flex items-center gap-2 shadow-lg active:scale-95"
              >
                {loading && <Loader2 size={18} className="animate-spin" />}
                Salvar Acesso
@@ -178,14 +178,14 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
               <tr key={profile.id} className={`transition-colors ${!profile.active ? 'bg-gray-50/50' : 'hover:bg-slate-50'}`}>
                 <td className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-sm ${!profile.active ? 'bg-slate-300' : profile.role === 'ADMIN' ? 'bg-slate-800' : 'bg-indigo-500'}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-sm ${!profile.active ? 'bg-slate-300' : profile.role === 'ADMIN' ? 'bg-slate-800' : 'bg-orange-500'}`}>
                       {profile.name.charAt(0)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <p className={`font-bold ${!profile.active ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{profile.name}</p>
                         {String(profile.id) === String(currentUser.id) && (
-                          <span className="text-[10px] bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded border border-indigo-200 font-bold uppercase">Você</span>
+                          <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded border border-orange-200 font-bold uppercase">Você</span>
                         )}
                       </div>
                       <p className="text-xs text-slate-500 font-medium">{profile.email}</p>
@@ -206,7 +206,7 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold ${
                     profile.role === 'ADMIN' 
                       ? 'bg-slate-100 text-slate-700 border border-slate-200' 
-                      : 'bg-indigo-50 text-indigo-700 border border-indigo-100'
+                      : 'bg-orange-50 text-orange-700 border border-orange-100'
                   }`}>
                     {profile.role === 'ADMIN' ? <Shield size={12} /> : <User size={12} />}
                     {profile.role}
@@ -215,7 +215,7 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-1">
                     {processingId === profile.id ? (
-                      <div className="p-2"><Loader2 size={18} className="animate-spin text-indigo-600" /></div>
+                      <div className="p-2"><Loader2 size={18} className="animate-spin text-orange-600" /></div>
                     ) : (
                       <>
                         <button 
@@ -235,7 +235,7 @@ export const ProfilesManagement: React.FC<ProfilesManagementProps> = ({ currentU
                           className={`p-2 rounded-xl transition-all ${
                             String(profile.id) === String(currentUser.id) 
                               ? 'text-slate-200 cursor-not-allowed' 
-                              : 'text-slate-300 hover:text-rose-500 hover:bg-rose-50'
+                              : 'text-slate-300 hover:text-red-500 hover:bg-red-50'
                           }`}
                           title="Excluir Definitivamente"
                           disabled={String(profile.id) === String(currentUser.id)}

@@ -37,7 +37,7 @@ const Customers: React.FC = () => {
         <div className="flex gap-4">
           <input className="border p-2 rounded flex-1" placeholder="Nome" value={name} onChange={e => setName(e.target.value)} />
           <input className="border p-2 rounded flex-1" placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} />
-          <button onClick={handleAdd} disabled={loading} className="bg-indigo-600 text-white px-4 py-2 rounded flex items-center">
+          <button onClick={handleAdd} disabled={loading} className="bg-orange-600 text-white px-4 py-2 rounded flex items-center hover:bg-orange-700 transition-colors">
             {loading ? <Loader2 className="animate-spin mr-2" size={16} /> : null}
             Salvar
           </button>
@@ -91,9 +91,9 @@ const LoginScreen = ({ onLoginSuccess }: { onLoginSuccess: (user: Profile) => vo
   };
 
   return (
-    <div className="min-h-screen bg-indigo-600 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-orange-600 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center animate-in fade-in zoom-in duration-300">
-        <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+        <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
           <Tag size={40} />
         </div>
         <h1 className="text-3xl font-bold text-slate-800 mb-1">BrechOnLine</h1>
@@ -112,7 +112,7 @@ const LoginScreen = ({ onLoginSuccess }: { onLoginSuccess: (user: Profile) => vo
             <input 
               type="email" 
               placeholder="Digite seu e-mail" 
-              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none" 
+              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all outline-none" 
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
@@ -123,7 +123,7 @@ const LoginScreen = ({ onLoginSuccess }: { onLoginSuccess: (user: Profile) => vo
             <input 
               type="password" 
               placeholder="Digite sua senha" 
-              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none" 
+              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all outline-none" 
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -192,7 +192,7 @@ const AppContent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-white text-indigo-600">
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-white text-orange-600">
         <Loader2 className="animate-spin mb-4" size={48} />
         <p className="font-bold text-slate-700 tracking-tight">BRECHONLINE</p>
         <p className="text-sm text-slate-400 mt-2">Carregando dados da loja...</p>
@@ -227,7 +227,7 @@ const AppContent: React.FC = () => {
     >
       <div className="mb-4 flex items-center justify-between">
          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${user.role === 'ADMIN' ? 'bg-slate-800' : 'bg-indigo-500'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${user.role === 'ADMIN' ? 'bg-slate-800' : 'bg-orange-500'}`}></div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">
               Acesso: {user.role} | Operador: {user.name}
             </p>

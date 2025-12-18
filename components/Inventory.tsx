@@ -98,7 +98,7 @@ export const Inventory: React.FC = () => {
         <h2 className="text-2xl font-bold text-slate-800">Estoque</h2>
         <button 
           onClick={() => { setShowAddModal(true); setErrorMessage(null); }}
-          className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 active:scale-95 transition"
+          className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 active:scale-95 transition shadow-md"
         >
           <Plus size={20} />
           <span>Nova Peça</span>
@@ -118,7 +118,7 @@ export const Inventory: React.FC = () => {
                onClick={() => setFilter(tab.id as any)}
                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                  filter === tab.id 
-                   ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' 
+                   ? 'bg-orange-100 text-orange-700 border border-orange-200' 
                    : 'bg-gray-50 text-slate-600 hover:bg-gray-100'
                }`}
              >
@@ -131,7 +131,7 @@ export const Inventory: React.FC = () => {
           <input 
             type="text" 
             placeholder="Buscar por código ou categoria..." 
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -168,7 +168,7 @@ export const Inventory: React.FC = () => {
                     item.status === ItemStatus.FOR_SALE ? 'bg-emerald-100 text-emerald-700' :
                     item.status === ItemStatus.EVALUATION ? 'bg-amber-100 text-amber-700' :
                     item.status === ItemStatus.SOLD ? 'bg-gray-100 text-gray-500' :
-                    'bg-blue-100 text-blue-700'
+                    'bg-orange-100 text-orange-700'
                   }`}>
                     {item.status === ItemStatus.FOR_SALE ? 'À Venda' : 
                      item.status === ItemStatus.EVALUATION ? 'Avaliação' : 
@@ -264,7 +264,7 @@ export const Inventory: React.FC = () => {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Título / Categoria</label>
                 <input 
                   type="text" 
-                  className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500" 
+                  className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-orange-500" 
                   placeholder="Ex: Vestido Floral, Camisa Xadrez..."
                   value={newCategory} 
                   onChange={e => setNewCategory(e.target.value)} 
@@ -294,7 +294,7 @@ export const Inventory: React.FC = () => {
                    <input
                      type="number"
                      step="0.01"
-                     className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500"
+                     className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-orange-500"
                      placeholder="0,00"
                      value={newPrice}
                      onChange={e => setNewPrice(e.target.value)}
@@ -322,7 +322,7 @@ export const Inventory: React.FC = () => {
               <button 
                 onClick={handleSave} 
                 disabled={loading}
-                className="flex-1 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-md flex items-center justify-center gap-2"
+                className="flex-1 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 shadow-md flex items-center justify-center gap-2"
               >
                 {loading && <Loader2 className="animate-spin" size={18} />}
                 Salvar e Avaliar

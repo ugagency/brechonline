@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useStore } from '../services/store';
 import { ItemStatus } from '../types';
@@ -54,7 +55,7 @@ export const Dashboard: React.FC<{ setView: (v: string) => void }> = ({ setView 
           value={inventoryCount} 
           sub="Peças prontas para venda"
           icon={Package} 
-          color="bg-indigo-500"
+          color="bg-orange-500"
           onClick={() => setView('inventory')}
         />
         <StatCard 
@@ -79,7 +80,7 @@ export const Dashboard: React.FC<{ setView: (v: string) => void }> = ({ setView 
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
           <h3 className="font-semibold text-lg mb-4">Ações Rápidas</h3>
           <div className="grid grid-cols-2 gap-4">
-            <button onClick={() => setView('pos')} className="p-4 bg-indigo-50 text-indigo-700 rounded-lg font-medium hover:bg-indigo-100 transition text-center">
+            <button onClick={() => setView('pos')} className="p-4 bg-orange-50 text-orange-700 rounded-lg font-medium hover:bg-orange-100 transition text-center">
               Nova Venda
             </button>
             <button onClick={() => setView('trade')} className="p-4 bg-emerald-50 text-emerald-700 rounded-lg font-medium hover:bg-emerald-100 transition text-center">

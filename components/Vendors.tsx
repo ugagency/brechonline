@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useStore } from '../services/store';
 import { Plus, ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
@@ -55,7 +56,7 @@ export const Vendors: React.FC = () => {
         <h2 className="text-2xl font-bold text-slate-800">Fornecedoras (Consignação)</h2>
         <button 
           onClick={() => setShowAdd(true)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"
+          className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition flex items-center gap-2 shadow-md"
         >
           <Plus size={18} /> Cadastrar
         </button>
@@ -75,7 +76,7 @@ export const Vendors: React.FC = () => {
           </div>
           <div className="flex justify-end gap-2">
              <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-slate-500">Cancelar</button>
-             <button onClick={handleAdd} className="px-4 py-2 bg-slate-900 text-white rounded-lg">Salvar</button>
+             <button onClick={handleAdd} className="px-4 py-2 bg-slate-900 text-white rounded-lg shadow">Salvar</button>
           </div>
         </div>
       )}
@@ -94,7 +95,7 @@ export const Vendors: React.FC = () => {
                   onClick={() => setExpandedVendor(expandedVendor === vendor.id ? null : vendor.id)}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold">
+                    <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-700 flex items-center justify-center font-bold">
                       {vendor.name.charAt(0)}
                     </div>
                     <div>

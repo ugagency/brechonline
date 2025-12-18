@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useStore } from '../services/store';
 import { ItemCondition } from '../types';
@@ -71,7 +72,7 @@ export const TradeIn: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-        <RefreshCcw className="text-indigo-600" />
+        <RefreshCcw className="text-orange-600" />
         Troca por Crédito
       </h2>
 
@@ -83,7 +84,7 @@ export const TradeIn: React.FC = () => {
             <label className="text-sm font-medium text-slate-700">Cliente</label>
             <button 
               onClick={() => setShowNewClient(!showNewClient)}
-              className="text-sm text-indigo-600 hover:underline flex items-center"
+              className="text-sm text-orange-600 hover:underline flex items-center"
             >
               <UserPlus size={14} className="mr-1"/> Novo Cliente
             </button>
@@ -114,7 +115,7 @@ export const TradeIn: React.FC = () => {
             </div>
           ) : (
             <select 
-              className="w-full p-3 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-3 border rounded-lg bg-white focus:ring-2 focus:ring-orange-500"
               value={customerId}
               onChange={e => setCustomerId(e.target.value)}
             >

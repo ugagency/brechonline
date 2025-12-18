@@ -15,7 +15,7 @@ const NavItem = ({ view, current, label, icon: Icon, setView }: any) => (
     onClick={() => setView(view)}
     className={`flex items-center space-x-3 p-3 rounded-lg w-full transition-colors ${
       current === view 
-        ? 'bg-indigo-600 text-white shadow-md' 
+        ? 'bg-orange-600 text-white shadow-md' 
         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
     }`}
   >
@@ -28,7 +28,7 @@ const MobileNavItem = ({ view, current, icon: Icon, setView, label }: any) => (
   <button
     onClick={() => setView(view)}
     className={`flex flex-col items-center justify-center w-full p-2 ${
-      current === view ? 'text-indigo-600' : 'text-slate-400'
+      current === view ? 'text-orange-600' : 'text-slate-400'
     }`}
   >
     <Icon size={24} />
@@ -44,7 +44,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-full">
         <div className="p-6 border-b border-gray-100 flex items-center space-x-2">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
             <Tag className="text-white" size={18} />
           </div>
           <h1 className="text-xl font-bold text-slate-800">BrechOnLine</h1>
@@ -83,7 +83,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         <header className="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center z-20">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
               <Tag className="text-white" size={18} />
             </div>
             <h1 className="text-lg font-bold text-slate-800">BrechOnLine</h1>
