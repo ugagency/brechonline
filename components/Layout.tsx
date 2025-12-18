@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { LayoutDashboard, ShoppingBag, RefreshCcw, Users, Tag, LogOut, Menu } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, RefreshCcw, Users, Tag, LogOut, Settings, ShieldCheck } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -35,8 +36,6 @@ const MobileNavItem = ({ view, current, icon: Icon, setView, label }: any) => (
 );
 
 export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, onLogout }) => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Desktop Sidebar */}
@@ -48,13 +47,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
           <h1 className="text-xl font-bold text-slate-800">BrechOnLine</h1>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <NavItem view="dashboard" current={currentView} label="Início" icon={LayoutDashboard} setView={setView} />
           <NavItem view="inventory" current={currentView} label="Estoque & Avaliação" icon={Tag} setView={setView} />
           <NavItem view="pos" current={currentView} label="PDV (Caixa)" icon={ShoppingBag} setView={setView} />
           <NavItem view="trade" current={currentView} label="Trocas & Crédito" icon={RefreshCcw} setView={setView} />
           <NavItem view="vendors" current={currentView} label="Fornecedoras" icon={Users} setView={setView} />
           <NavItem view="customers" current={currentView} label="Clientes" icon={Users} setView={setView} />
+          <div className="pt-4 pb-2">
+             <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sistema</p>
+          </div>
+          <NavItem view="profiles" current={currentView} label="Usuários" icon={ShieldCheck} setView={setView} />
         </nav>
 
         <div className="p-4 border-t border-gray-200">
@@ -70,7 +73,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
-        {/* Mobile Header */}
         <header className="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center z-20">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -83,7 +85,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
           </button>
         </header>
 
-        {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
           {children}
         </div>
@@ -94,7 +95,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
           <MobileNavItem view="inventory" current={currentView} label="Estoque" icon={Tag} setView={setView} />
           <MobileNavItem view="pos" current={currentView} label="Caixa" icon={ShoppingBag} setView={setView} />
           <MobileNavItem view="trade" current={currentView} label="Trocas" icon={RefreshCcw} setView={setView} />
-          <MobileNavItem view="vendors" current={currentView} label="Parceiras" icon={Users} setView={setView} />
+          <MobileNavItem view="profiles" current={currentView} label="Acessos" icon={ShieldCheck} setView={setView} />
         </div>
       </main>
     </div>

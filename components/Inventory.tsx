@@ -1,19 +1,22 @@
+
 import React, { useState } from 'react';
 import { useStore } from '../services/store';
 import { Item, ItemCondition, ItemStatus } from '../types';
-import { Plus, Check, X, Search, Filter, Camera, Upload } from 'lucide-react';
+import { Plus, Check, X, Search, Filter, Camera, Upload, Loader2, AlertCircle } from 'lucide-react';
 
 export const Inventory: React.FC = () => {
   const { items, addItem, updateItemStatus, vendors } = useStore();
   const [filter, setFilter] = useState<'ALL' | 'EVALUATION' | 'FOR_SALE' | 'SOLD'>('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form State
   const [newCategory, setNewCategory] = useState('');
   const [newSize, setNewSize] = useState('M');
   const [newCondition, setNewCondition] = useState<ItemCondition>(ItemCondition.GOOD);
-  const [newPrice, setNewPrice] = useState(''); // Empty string to allow typing
+  const [newPrice, setNewPrice] = useState('');
   const [newVendorId, setNewVendorId] = useState('');
   const [newImage, setNewImage] = useState<string>('');
 
@@ -35,7 +38,8 @@ export const Inventory: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setErrorMessage(null);
     if (!newImage) {
       alert("A imagem do produto é obrigatória.");
       return;
@@ -50,22 +54,31 @@ export const Inventory: React.FC = () => {
       return;
     }
 
-    addItem({
-      imageUrl: newImage,
-      category: newCategory,
-      size: newSize,
-      condition: newCondition,
-      price: priceValue,
-      vendorId: newVendorId || undefined,
-      description: ''
-    });
-    
-    // Reset Form
-    setNewImage('');
-    setNewCategory('');
-    setNewPrice('');
-    setNewSize('M');
-    setShowAddModal(false);
+    setLoading(true);
+    try {
+      await addItem({
+        imageUrl: newImage,
+        category: newCategory,
+        size: newSize,
+        condition: newCondition,
+        price: priceValue,
+        vendorId: newVendorId || undefined,
+        description: ''
+      });
+      
+      setNewImage('');
+      setNewCategory('');
+      setNewPrice('');
+      setNewSize('M');
+      setShowAddModal(false);
+      alert("Peça cadastrada com sucesso!");
+    } catch (e: any) {
+      console.error(e);
+      const msg = e.message || "Erro desconhecido";
+      setErrorMessage(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,7 +86,7 @@ export const Inventory: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-slate-800">Estoque</h2>
         <button 
-          onClick={() => setShowAddModal(true)}
+          onClick={() => { setShowAddModal(true); setErrorMessage(null); }}
           className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 active:scale-95 transition"
         >
           <Plus size={20} />
@@ -128,7 +141,7 @@ export const Inventory: React.FC = () => {
           <tbody className="divide-y divide-gray-100">
             {filteredItems.map(item => (
               <tr key={item.id} className="hover:bg-slate-50">
-                <td className="p-4 font-mono text-sm text-slate-600 align-middle">{item.id}</td>
+                <td className="p-4 font-mono text-sm text-slate-600 align-middle">{item.id.slice(-8)}</td>
                 <td className="p-4 flex items-center space-x-3">
                   <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0">
                     <img src={item.imageUrl} alt={item.category} className="w-full h-full object-cover" />
@@ -162,8 +175,9 @@ export const Inventory: React.FC = () => {
                       </button>
                       <button 
                         onClick={() => {
-                          alert("Peça reprovada/arquivada");
-                          updateItemStatus(item.id, ItemStatus.TRADED);
+                          if(confirm("Deseja marcar esta peça como recusada?")) {
+                            updateItemStatus(item.id, ItemStatus.TRADED);
+                          }
                         }}
                         className="p-1 text-red-600 hover:bg-red-50 rounded" title="Reprovar"
                       >
@@ -193,6 +207,16 @@ export const Inventory: React.FC = () => {
             </div>
             
             <div className="p-6 space-y-4 overflow-y-auto">
+              {errorMessage && (
+                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="flex-shrink-0 mt-0.5" size={18} />
+                  <div className="text-sm">
+                    <p className="font-bold mb-1">Erro ao Salvar</p>
+                    <p>{errorMessage}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Image Upload */}
               <div>
                  <label className="block text-sm font-medium text-slate-700 mb-2">Foto da Peça <span className="text-red-500">*</span></label>
@@ -275,7 +299,14 @@ export const Inventory: React.FC = () => {
             </div>
             <div className="p-4 bg-gray-50 flex space-x-3 flex-shrink-0">
               <button onClick={() => setShowAddModal(false)} className="flex-1 py-3 text-slate-600 font-medium hover:bg-gray-100 rounded-lg">Cancelar</button>
-              <button onClick={handleSave} className="flex-1 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-md">Salvar e Avaliar</button>
+              <button 
+                onClick={handleSave} 
+                disabled={loading}
+                className="flex-1 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-md flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 className="animate-spin" size={18} />}
+                Salvar e Avaliar
+              </button>
             </div>
           </div>
         </div>

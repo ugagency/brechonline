@@ -1,8 +1,9 @@
+
 export enum ItemStatus {
   EVALUATION = 'EVALUATION',
   FOR_SALE = 'FOR_SALE',
   SOLD = 'SOLD',
-  TRADED = 'TRADED', // Was traded out (unlikely) or archived
+  TRADED = 'TRADED',
 }
 
 export enum ItemCondition {
@@ -12,11 +13,21 @@ export enum ItemCondition {
   FAIR = 'Com Detalhes',
 }
 
+export type UserRole = 'ADMIN' | 'CAIXA';
+
+export interface Profile {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  createdAt: string;
+}
+
 export interface Vendor {
   id: string;
   name: string;
   phone: string;
-  commissionRate: number; // 0 to 1 (e.g., 0.5 for 50%)
+  commissionRate: number;
   balance: number;
 }
 
@@ -28,21 +39,17 @@ export interface Customer {
 }
 
 export interface Item {
-  id: string; // generated code
-  imageUrl: string; // Mandatory image URL (Base64 or Link)
+  id: string;
+  imageUrl: string;
   category: string;
   size: string;
   condition: ItemCondition;
   price: number;
   status: ItemStatus;
-  vendorId?: string; // Optional (if store owned)
+  vendorId?: string;
   description?: string;
   entryDate: string;
   soldDate?: string;
-}
-
-export interface CartItem extends Item {
-  // Helper for POS
 }
 
 export interface Sale {

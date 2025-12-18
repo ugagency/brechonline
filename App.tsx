@@ -7,6 +7,7 @@ import { Inventory } from './components/Inventory';
 import { POS } from './components/POS';
 import { TradeIn } from './components/TradeIn';
 import { Vendors } from './components/Vendors';
+import { ProfilesManagement } from './components/ProfilesManagement';
 import { Tag, Loader2 } from 'lucide-react';
 import { useStore } from './services/store';
 
@@ -121,6 +122,7 @@ const AppContent: React.FC = () => {
       case 'trade': return <TradeIn />;
       case 'vendors': return <Vendors />;
       case 'customers': return <Customers />;
+      case 'profiles': return <ProfilesManagement />;
       default: return <Dashboard setView={setCurrentView} />;
     }
   };

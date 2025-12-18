@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Item, Vendor, Customer, Sale, Coupon, ItemStatus, ItemCondition } from '../types';
+import { Item, Vendor, Customer, Sale, Coupon, ItemStatus, ItemCondition, Profile, UserRole } from '../types';
 import { supabase } from './supabase';
 
 interface StoreContextType {
@@ -9,6 +9,7 @@ interface StoreContextType {
   customers: Customer[];
   sales: Sale[];
   coupons: Coupon[];
+  profiles: Profile[];
   loading: boolean;
   
   addItem: (item: Omit<Item, 'id' | 'entryDate' | 'status'>) => Promise<void>;
@@ -19,6 +20,8 @@ interface StoreContextType {
   processSale: (itemIds: string[], customerId: string | undefined, paymentMethod: string, discount: number, usedCredit: number) => Promise<void>;
   processTradeIn: (customerId: string, creditAmount: number, newItems: Omit<Item, 'id' | 'entryDate' | 'status'>[]) => Promise<void>;
   addCoupon: (coupon: Coupon) => Promise<void>;
+  addProfile: (profile: Omit<Profile, 'id' | 'createdAt'>) => Promise<void>;
+  deleteProfile: (id: string) => Promise<void>;
   fetchData: () => Promise<void>;
 }
 
@@ -30,26 +33,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      const [
-        { data: itemsData },
-        { data: vendorsData },
-        { data: customersData },
-        { data: couponsData },
-        { data: salesData }
-      ] = await Promise.all([
+      const [itemsRes, vendorsRes, customersRes, couponsRes, salesRes, profilesRes] = await Promise.all([
         supabase.from('items').select('*').order('created_at', { ascending: false }),
         supabase.from('vendors').select('*').order('name'),
         supabase.from('customers').select('*').order('name'),
         supabase.from('coupons').select('*'),
-        supabase.from('sales').select('*, sale_items(*)').order('created_at', { ascending: false })
+        supabase.from('sales').select('*, sale_items(*)').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*').order('name')
       ]);
 
-      if (itemsData) {
-        setItems(itemsData.map(i => ({
+      if (itemsRes.data) {
+        setItems(itemsRes.data.map(i => ({
           id: String(i.id),
           imageUrl: String(i.image_url || ''),
           category: String(i.title || ''),
@@ -63,8 +62,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })));
       }
       
-      if (vendorsData) {
-        setVendors(vendorsData.map(v => ({
+      if (vendorsRes.data) {
+        setVendors(vendorsRes.data.map(v => ({
           id: String(v.id),
           name: String(v.name || ''),
           phone: String(v.phone || ''),
@@ -73,8 +72,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })));
       }
 
-      if (customersData) {
-        setCustomers(customersData.map(c => ({
+      if (customersRes.data) {
+        setCustomers(customersRes.data.map(c => ({
           id: String(c.id),
           name: String(c.name || ''),
           cpf: String(c.cpf || ''),
@@ -82,8 +81,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })));
       }
 
-      if (couponsData) {
-        setCoupons(couponsData.map(cp => ({
+      if (couponsRes.data) {
+        setCoupons(couponsRes.data.map(cp => ({
           code: String(cp.code || ''),
           type: (cp.type || 'FIXED') as 'FIXED' | 'PERCENT',
           value: Number(cp.value || 0),
@@ -91,10 +90,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })));
       }
 
-      if (salesData) {
-        setSales(salesData.map(s => ({
+      if (salesRes.data) {
+        setSales(salesRes.data.map(s => ({
           id: String(s.id),
-          items: [], // Item objects could be reconstructed from sale_items if needed
+          items: [],
           total: Number(s.total_amount || 0),
           date: String(s.created_at),
           paymentMethod: (s.payment_method || 'CASH') as any,
@@ -102,8 +101,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           discountApplied: Number(s.discount_applied || 0) + Number(s.credit_used || 0)
         })));
       }
-    } catch (error) {
-      console.error('Error fetching data:', error);
+
+      if (profilesRes.data) {
+        setProfiles(profilesRes.data.map(p => ({
+          id: String(p.id),
+          name: String(p.name || ''),
+          email: String(p.email || ''),
+          role: (p.role || 'CAIXA') as UserRole,
+          createdAt: String(p.created_at)
+        })));
+      }
+    } catch (error: any) {
+      console.error('Falha ao buscar dados:', error.message);
     } finally {
       setLoading(false);
     }
@@ -116,41 +125,52 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const uploadImage = async (base64: string): Promise<string> => {
     if (!base64.startsWith('data:image')) return base64;
     
-    const fileName = `${Math.random().toString(36).substring(2)}.png`;
-    const res = await fetch(base64);
-    const blob = await res.blob();
-    
-    const { error: uploadError } = await supabase.storage
-      .from('products')
-      .upload(fileName, blob);
+    try {
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
+      const res = await fetch(base64);
+      const blob = await res.blob();
       
-    if (uploadError) throw uploadError;
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from('products')
-      .getPublicUrl(fileName);
+      const { error: uploadError } = await supabase.storage.from('products').upload(fileName, blob);
       
-    return publicUrl;
+      if (uploadError) {
+        console.error('Erro detalhado do Storage:', uploadError);
+        if (uploadError.message.includes('row-level security')) {
+          throw new Error('PERMISSÃO NEGADA: O bucket "products" no Supabase precisa de uma política (RLS) que permita inserção pública. Vá em Storage -> Policies e adicione uma política para o bucket "products".');
+        }
+        throw new Error(`Erro Storage: ${uploadError.message}`);
+      }
+      
+      const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
+      return publicUrl;
+    } catch (e: any) {
+      console.error('Falha no uploadImage:', e);
+      throw e;
+    }
   };
 
   const addItem = async (itemData: Omit<Item, 'id' | 'entryDate' | 'status'>) => {
-    const publicUrl = await uploadImage(itemData.imageUrl);
-    const { error } = await supabase.from('items').insert({
-      title: itemData.category,
-      size: itemData.size,
-      condition: itemData.condition,
-      price: itemData.price,
-      image_url: publicUrl,
-      vendor_id: itemData.vendorId || null,
-      status: ItemStatus.EVALUATION
-    });
-    if (error) throw error;
-    await fetchData();
+    try {
+      const publicUrl = await uploadImage(itemData.imageUrl);
+      const { error } = await supabase.from('items').insert({
+        title: itemData.category,
+        size: itemData.size,
+        condition: itemData.condition,
+        price: itemData.price,
+        image_url: publicUrl,
+        vendor_id: itemData.vendorId || null,
+        status: ItemStatus.EVALUATION
+      });
+      if (error) throw new Error(`Erro Banco: ${error.message}`);
+      await fetchData();
+    } catch (e: any) {
+      console.error('Falha no addItem:', e);
+      throw e;
+    }
   };
 
   const updateItemStatus = async (id: string, status: ItemStatus) => {
     const { error } = await supabase.from('items').update({ status }).eq('id', id);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     await fetchData();
   };
 
@@ -160,45 +180,43 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       phone: vendorData.phone,
       commission_rate: vendorData.commissionRate
     });
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     await fetchData();
   };
 
   const payVendor = async (vendorId: string, amount: number) => {
     const vendor = vendors.find(v => v.id === vendorId);
     if (!vendor) return;
-
-    const { error: payoutError } = await supabase.from('vendor_payouts').insert({
-      vendor_id: vendorId,
-      amount: amount
-    });
-    if (payoutError) throw payoutError;
-
-    const { error: updateError } = await supabase.from('vendors').update({
-      balance: vendor.balance - amount
-    }).eq('id', vendorId);
-    
-    if (updateError) throw updateError;
+    await supabase.from('vendor_payouts').insert({ vendor_id: vendorId, amount: amount });
+    await supabase.from('vendors').update({ balance: vendor.balance - amount }).eq('id', vendorId);
     await fetchData();
   };
 
   const addCustomer = async (customerData: Omit<Customer, 'id' | 'storeCredit'>) => {
-    const { error } = await supabase.from('customers').insert({
-      name: customerData.name,
-      cpf: customerData.cpf
-    });
-    if (error) throw error;
+    const { error } = await supabase.from('customers').insert({ name: customerData.name, cpf: customerData.cpf });
+    if (error) throw new Error(error.message);
     await fetchData();
   };
 
   const addCoupon = async (coupon: Coupon) => {
-    const { error } = await supabase.from('coupons').insert({
-      code: coupon.code,
-      type: coupon.type,
-      value: coupon.value,
-      active: coupon.active
+    const { error } = await supabase.from('coupons').insert({ code: coupon.code, type: coupon.type, value: coupon.value, active: coupon.active });
+    if (error) throw new Error(error.message);
+    await fetchData();
+  };
+
+  const addProfile = async (profileData: Omit<Profile, 'id' | 'createdAt'>) => {
+    const { error } = await supabase.from('profiles').insert({
+      name: profileData.name,
+      email: profileData.email,
+      role: profileData.role
     });
-    if (error) throw error;
+    if (error) throw new Error(`Erro Banco: ${error.message}`);
+    await fetchData();
+  };
+
+  const deleteProfile = async (id: string) => {
+    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    if (error) throw new Error(error.message);
     await fetchData();
   };
 
@@ -207,7 +225,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const subtotal = saleItemsList.reduce((acc, i) => acc + i.price, 0);
     const total = Math.max(0, subtotal - discount - usedCredit);
 
-    // 1. Criar a venda
     const { data: saleData, error: saleError } = await supabase.from('sales').insert({
       customer_id: customerId || null,
       total_amount: total,
@@ -216,26 +233,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       payment_method: paymentMethod
     }).select().single();
 
-    if (saleError) throw saleError;
-    if (!saleData) throw new Error("Falha ao registrar venda.");
+    if (saleError || !saleData) throw new Error(`Venda falhou: ${saleError?.message}`);
 
-    // 2. Vincular itens da venda
     const saleItemsPayload = saleItemsList.map(item => ({
       sale_id: saleData.id,
       item_id: item.id,
       price_sold: item.price
     }));
 
-    const { error: saleItemsError } = await supabase.from('sale_items').insert(saleItemsPayload);
-    if (saleItemsError) throw saleItemsError;
+    await supabase.from('sale_items').insert(saleItemsPayload);
+    await supabase.from('items').update({ status: ItemStatus.SOLD, sold_at: new Date().toISOString() }).in('id', itemIds);
 
-    // 3. Atualizar status dos itens
-    await supabase.from('items').update({ 
-      status: ItemStatus.SOLD, 
-      sold_at: new Date().toISOString() 
-    }).in('id', itemIds);
-
-    // 4. Atualizar saldo das fornecedoras
     for (const item of saleItemsList) {
       if (item.vendorId) {
         const vendor = vendors.find(v => v.id === item.vendorId);
@@ -246,7 +254,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
 
-    // 5. Debitar crédito do cliente
     if (customerId && usedCredit > 0) {
       const customer = customers.find(c => c.id === customerId);
       if (customer) {
@@ -265,30 +272,24 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const processTradeIn = async (customerId: string, creditAmount: number, newItems: Omit<Item, 'id' | 'entryDate' | 'status'>[]) => {
-    // 1. Adicionar crédito
-    const customer = customers.find(c => c.id === customerId);
-    if (customer) {
-      await supabase.from('customers').update({ store_credit: customer.storeCredit + creditAmount }).eq('id', customerId);
-      await supabase.from('customer_transactions').insert({
-        customer_id: customerId,
-        type: 'CREDIT_ADDED',
-        amount: creditAmount,
-        description: 'Troca de peças'
-      });
+    try {
+      const customer = customers.find(c => c.id === customerId);
+      if (customer) {
+        await supabase.from('customers').update({ store_credit: customer.storeCredit + creditAmount }).eq('id', customerId);
+        await supabase.from('customer_transactions').insert({ customer_id: customerId, type: 'CREDIT_ADDED', amount: creditAmount, description: 'Troca de peças' });
+      }
+      for (const item of newItems) { await addItem(item); }
+      await fetchData();
+    } catch (e: any) {
+      console.error('Falha no processTradeIn:', e);
+      throw e;
     }
-
-    // 2. Adicionar novos itens
-    for (const item of newItems) {
-      await addItem(item);
-    }
-    
-    await fetchData();
   };
 
   return (
     <StoreContext.Provider value={{ 
-      items, vendors, customers, sales, coupons, loading,
-      addItem, updateItemStatus, addVendor, payVendor, addCustomer, processSale, processTradeIn, addCoupon, fetchData
+      items, vendors, customers, sales, coupons, profiles, loading,
+      addItem, updateItemStatus, addVendor, payVendor, addCustomer, processSale, processTradeIn, addCoupon, fetchData, addProfile, deleteProfile
     }}>
       {children}
     </StoreContext.Provider>
